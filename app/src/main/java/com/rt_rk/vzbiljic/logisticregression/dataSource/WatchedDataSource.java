@@ -5,10 +5,11 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-import com.rt_rk.vzbiljic.logisticregression.test.GradientCheckTest;
 import com.rt_rk.vzbiljic.logisticregression.util.MatrixPrint;
+import com.rt_rk.vzbiljic.logisticregression.util.PropertiesUtil;
 import com.rt_rk.vzbiljic.logisticregression.util.SinusoidInitMatrix;
 
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
@@ -25,20 +26,70 @@ public class WatchedDataSource implements IDataSource{
 
 
 
-    private Context context;
+
 
     private static final int DEFAULT_MAT_DATA_TYPE = CvType.CV_64F;
 
 
+    //map CANONICAL_GENRE to BROADCST_GENRE
+    private static HashMap<String,Integer> mappGenre = new HashMap<>();
+
+    private static int genreSize = 0;
+
+    private static final int  OTHERS_COLUMN;
+
+    static {
+
+        mappGenre.put("Cuisine",genreSize++);
+        mappGenre.put("Infotmations",genreSize);
+        mappGenre.put("Actualité",genreSize++);
+        mappGenre.put("Fiction",genreSize++);
+        mappGenre.put("Fantastique",genreSize);
+        mappGenre.put("Drame",genreSize);
+        mappGenre.put("Court métrage",genreSize);
+        mappGenre.put("Comédie",genreSize);
+        mappGenre.put("Action",genreSize);
+        mappGenre.put("Cinéma",genreSize);
+        mappGenre.put("Classique",genreSize);
+        mappGenre.put("Film",genreSize++);
+        mappGenre.put("Architecture",genreSize);
+        mappGenre.put("Jardinage",genreSize);
+        mappGenre.put("Civilisation",genreSize);
+        mappGenre.put("Natation",genreSize);
+        mappGenre.put("Documentaire",genreSize++);
+        mappGenre.put("Enfants",genreSize);
+        mappGenre.put("Dessins animés",genreSize++);
+        mappGenre.put("Magazine",genreSize);
+        mappGenre.put("Divertissement",genreSize);
+        mappGenre.put("Animation",genreSize);
+        mappGenre.put("Loisirs",genreSize);
+        mappGenre.put("Consommation",genreSize++);
+        mappGenre.put("Football",genreSize);
+        mappGenre.put("Cyclisme",genreSize);
+        mappGenre.put("Boxe",genreSize);
+        mappGenre.put("Golf",genreSize);
+        mappGenre.put("Sport",genreSize++);
+        mappGenre.put("Comédie musicale",genreSize);
+        mappGenre.put("Danse",genreSize);
+        mappGenre.put("Jazz",genreSize);
+        mappGenre.put("Musique & Arts",genreSize++);
+        mappGenre.put("Ballet",genreSize);
+        mappGenre.put("Arts",genreSize++);
+        mappGenre.put("Others",genreSize);
+        OTHERS_COLUMN=genreSize;
+        mappGenre.put("Adultes",genreSize++);
+
+
+
+    }
+
+
+
+    private Context context;
     private Mat X=null;
     private Mat y=null;
     private List<Mat> thetas=null;
-    //hidden layer size without bios unit
-    private final int HIDDEN_LAYER_SIZE;
-    //input layer size without bios unit
-    private final int INPUT_LAYER_SIZE = 5;
 
-    private final int OUTPUT_LAYER_SIZE = 1;
 
 
     private static final int DEFAULT_HIDDEN_LAYER_SIZE = 10;
@@ -55,9 +106,17 @@ public class WatchedDataSource implements IDataSource{
     private static final int CHANNEL_ID = 1;
     private static final int START_TIME = 2;
     private static final int END_TIME = 3;
-    private static final int GENRE = 4;
-    private static final int DAY_OF_THE_WEEK = 5;
-    private static final int TEMP_START_TIME_MILLIS = 6;
+    private static final int DAY_OF_THE_WEEK = 4;
+    private static final int GENRE_START = 5;
+    private static final int TEMP_START_TIME_MILLIS = GENRE_START + genreSize;
+
+
+    //hidden layer size without bios unit
+    private final int HIDDEN_LAYER_SIZE;
+    //input layer size without bios unit
+    private final int INPUT_LAYER_SIZE = TEMP_START_TIME_MILLIS - 1;
+
+    private final int OUTPUT_LAYER_SIZE = 1;
 
     //the value in witch Epsilon surrounding should be initial theta values
     private static final double CONVERGE_VALUE = 4;
@@ -91,6 +150,27 @@ public class WatchedDataSource implements IDataSource{
                 COLUMN_END_TIME_UTC_MILLIS,
                 COLUMN_BROADCAST_GENRE
         };
+
+        long startTimeLimit,endTimeLimit;
+
+
+
+        //in debug mode app works only with debug data
+        if(PropertiesUtil.getBooleanProperty(PropertiesUtil.DEBUG_BOOLEAN_KEY)){
+             startTimeLimit =PropertiesUtil.getDateToSQLDateProperty(PropertiesUtil.DEBUG_START_TIME_KEY);
+             endTimeLimit = PropertiesUtil.getDateToSQLDateProperty(PropertiesUtil.DEBUG_END_TIME_KEY);
+        }else{//in product mode takes only some amount of data.
+
+            GregorianCalendar endDate = new GregorianCalendar();
+            endDate.setTimeInMillis(System.currentTimeMillis());
+            endDate.add(Calendar.DAY_OF_YEAR, - PropertiesUtil.getIntProperty(PropertiesUtil.WINDOW_SIZE_KEY));
+
+            startTimeLimit = System.currentTimeMillis();
+
+            endTimeLimit = endDate.getTimeInMillis();
+
+
+        }
         Cursor cursor = context.getContentResolver().query(
                 EPG_URI,
                 lProjection,
@@ -102,7 +182,7 @@ public class WatchedDataSource implements IDataSource{
         if (cursor != null) {
             //data set has all columns queried from ContentProvider
             //plus one more column, day of the week
-            X = new Mat(cursor.getCount(),TEMP_START_TIME_MILLIS+1, DEFAULT_MAT_DATA_TYPE);
+            X = new Mat(0,TEMP_START_TIME_MILLIS+1, DEFAULT_MAT_DATA_TYPE);
 
             int index = 0;
 
@@ -113,15 +193,26 @@ public class WatchedDataSource implements IDataSource{
 
             double minChannel = Double.MAX_VALUE;
             double maxChannel = 0;
+
             //put all data in matrix while performing --feature scaling-- where possible
             //all features are scaled in range of -0.5 to 0.5
             while(cursor.moveToNext()){
+
+
+                //considers only some amount of data
+                if(cursor.getLong(cursor.getColumnIndex(COLUMN_START_TIME_UTC_MILLIS)) < startTimeLimit ||
+                        cursor.getLong(cursor.getColumnIndex(COLUMN_START_TIME_UTC_MILLIS)) > endTimeLimit)
+                    continue;
+
+                //new row initialized to zeros because some genre values will stay zero;
+                Mat newRow = Mat.zeros(1,X.cols(),X.type());
+
                 //bios column
-                X.put(index,BIOS,1);
+                newRow.put(0,BIOS,1);
 
                 //channel_id --not scaled--
                 int channelId = cursor.getInt(cursor.getColumnIndex(COLUMN_CHANNEL_ID));
-                X.put(index,CHANNEL_ID,channelId);
+                newRow.put(0,CHANNEL_ID,channelId);
 
                 if(channelId > maxChannel){
                     maxChannel = channelId;
@@ -135,44 +226,48 @@ public class WatchedDataSource implements IDataSource{
                 long startTime = cursor.getLong(cursor.getColumnIndex(COLUMN_START_TIME_UTC_MILLIS));
                 GregorianCalendar gc = new GregorianCalendar();
                 gc.setTimeInMillis(startTime);
-                X.put(index,START_TIME, (60*gc.get(Calendar.HOUR) + gc.get(Calendar.MINUTE)-720)/1440.);
+                newRow.put(0,START_TIME, (60*gc.get(Calendar.HOUR) + gc.get(Calendar.MINUTE)-720)/1440.);
 
                 //end Time --scaled--
                 long endTime = cursor.getLong(cursor.getColumnIndex(COLUMN_START_TIME_UTC_MILLIS));
                 gc.setTimeInMillis(endTime);
-                X.put(index,END_TIME, (60*gc.get(Calendar.HOUR) + gc.get(Calendar.MINUTE)-720)/1440.);
+                newRow.put(0,END_TIME, (60*gc.get(Calendar.HOUR) + gc.get(Calendar.MINUTE)-720)/1440.);
 
-                //genre --not scaled--
-                Integer genre = genreMapping.get(cursor.getString(cursor.getColumnIndex(COLUMN_BROADCAST_GENRE)));
-                //if genre doesn't exists put it in map
+                //genre --scaled--
+                Integer genre = mappGenre.get(cursor.getString(cursor.getColumnIndex(COLUMN_BROADCAST_GENRE)));
+
+                //if genre doesn't exists put it in OTHERS_COLUMN
                 if(null == genre){
-                    genre = genreCount;
-
-                    genreMapping.put(cursor.getString(cursor.getColumnIndex(COLUMN_BROADCAST_GENRE)),genreCount++);
-
-
+                    genre = OTHERS_COLUMN;
                 }
-                X.put(index,GENRE,genre);
+                newRow.put(0, GENRE_START + genre ,1);
 
                 //day of the week --scaled--
                 //take it as day of the week of start Time
                 gc.setTimeInMillis(startTime);
-                X.put(index,DAY_OF_THE_WEEK,(gc.get(Calendar.DAY_OF_WEEK)-3.5)/7);
+                newRow.put(0,DAY_OF_THE_WEEK,(gc.get(Calendar.DAY_OF_WEEK)-3.5)/7);
 
 
                 //last column is startTimeInMillis and is used only to init Y matrix properly
                 //after that last column should be deleted
-                X.put(index,TEMP_START_TIME_MILLIS,startTime);
+                newRow.put(0,TEMP_START_TIME_MILLIS,startTime);
 
                 index++;
+
+
+
+                //add new row to X matrix
+                List<Mat> list = new ArrayList<>();
+                list.add(X);
+                list.add(newRow);
+                Core.vconcat(list,X);
             }
 
             cursor.close();
 
-            //scale channel_id and genre
+            //scale channel_id
             for(int i=0;i<X.rows();i++){
                 X.put(i,CHANNEL_ID,(X.get(i,CHANNEL_ID)[0] - (maxChannel + minChannel)/2)/maxChannel);
-                X.put(i,GENRE,(X.get(i,3)[0] - genreCount/2)/genreCount);
             }
 
 
@@ -192,26 +287,30 @@ public class WatchedDataSource implements IDataSource{
                     null
             );
 
+            MatrixPrint.peak(X,"X");
+
             if(null!= cursor ) {
                 //set y to be all zeros
                 y = Mat.zeros( 1,X.rows(), X.type());
 
-
+                boolean write = true;
                 while (cursor.moveToNext()){
                     long startTime = cursor.getLong(cursor.getColumnIndex(COLUMN_START_TIME_UTC_MILLIS));
 
                     boolean found = false;
+
                     //search positive examples in all examples matrix
                     for(int i=0;i<X.rows();i++){
                         if(X.get(i,TEMP_START_TIME_MILLIS)[0] == startTime){
                             found = true;
+
                             y.put(0,i,1);
                             break;
                         }
                     }
-                    //unexpected. If happens report warning
+                    write = false;
                     if(!found){
-                        Log.wtf(TAG,"Positive training example not found in all examples matrix, " +
+                        Log.w(TAG,"Positive training example not found in all examples matrix, " +
                                 "for input values, startTimeMillis: " + startTime + " and channelID: "
                                 + cursor.getInt(cursor.getColumnIndex(COLUMN_CHANNEL_ID)) );
                     }
@@ -231,7 +330,7 @@ public class WatchedDataSource implements IDataSource{
                 Log.i(TAG,"null cursor!");
             }
         }else{
-            Log.i(TAG,"null cursor!");
+            Log.i(TAG, "null cursor!");
         }
     }
 
@@ -271,7 +370,7 @@ public class WatchedDataSource implements IDataSource{
             thetas = new ArrayList<>();
 
             //init theta to small different values around 0
-            Mat theta1 = SinusoidInitMatrix.debugInitializeWeights(HIDDEN_LAYER_SIZE,INPUT_LAYER_SIZE);
+            Mat theta1 = SinusoidInitMatrix.debugInitializeWeights(HIDDEN_LAYER_SIZE, INPUT_LAYER_SIZE);
             Mat theta2 = SinusoidInitMatrix.debugInitializeWeights(OUTPUT_LAYER_SIZE, HIDDEN_LAYER_SIZE);
 
 

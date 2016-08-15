@@ -5,8 +5,6 @@ import android.util.Log;
 
 import com.rt_rk.vzbiljic.logisticregression.algorithm.IMachineLearningAlgorithm;
 import com.rt_rk.vzbiljic.logisticregression.algorithm.NeuralNetwork;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.IDataSource;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.MultipleDataSource;
 import com.rt_rk.vzbiljic.logisticregression.dataSource.WatchedDataSource;
 import com.rt_rk.vzbiljic.logisticregression.dataSource.multiple.AbstractCVMultipleDataSource;
 import com.rt_rk.vzbiljic.logisticregression.dataSource.multiple.RandomCVMultipleDataSource;
@@ -14,8 +12,6 @@ import com.rt_rk.vzbiljic.logisticregression.dataSource.multiple.RandomCVMultipl
 import org.opencv.core.Mat;
 
 import java.util.List;
-
-import javax.sql.DataSource;
 
 /**
  * Created by vzbiljic on 29.7.16..

@@ -3,6 +3,8 @@ package com.rt_rk.vzbiljic.logisticregression.algorithm;
 import android.content.Context;
 import android.util.Log;
 
+import com.rt_rk.vzbiljic.logisticregression.util.MatrixPrint;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -44,6 +46,7 @@ public class LogisticRegression implements IMachineLearningAlgorithm {
 
         //-x
         Core.subtract(Mat.zeros(x.rows(), x.cols(), x.type()), x, result);
+
 
         //-X*theta'
         Core.gemm(result, thetaTrans, 1, new Mat(), 0, result, 0);

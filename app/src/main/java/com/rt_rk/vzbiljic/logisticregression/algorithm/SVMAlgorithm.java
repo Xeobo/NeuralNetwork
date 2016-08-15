@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by vzbiljic on 12.7.16..
  */
-public class SVMAlgorithm implements IMachineLearningAlgorithm{
+public class    SVMAlgorithm implements IMachineLearningAlgorithm{
 
 
     private static final double C = 0.1;

@@ -52,11 +52,11 @@ public class RandomCVMultipleDataSource extends AbstractCVMultipleDataSource {
         Mat Xtrain = new Mat((int)(X.rows()*0.6),X.cols(),X.type());
         Mat Ytrain = new Mat(y.rows(),(int)(y.cols()*0.6),y.type());
 
-        Mat Xtest = new Mat((int)(X.rows()*0.2),X.cols(),X.type());
-        Mat Ytest = new Mat(y.rows(),(int)(y.cols()*0.2),y.type());
+        Mat XCV = new Mat((int)(X.rows()*0.2),X.cols(),X.type());
+        Mat YCV = new Mat(y.rows(),(int)(y.cols()*0.2),y.type());
 
-        Mat XCV = new Mat(X.rows()- Xtest.rows() - Xtrain.rows(),X.cols(),X.type());
-        Mat YCV = new Mat(y.rows(),y.cols()- Ytest.cols() - Ytrain.cols(),y.type());
+        Mat Xtest = new Mat(X.rows()- XCV.rows() - Xtrain.rows(),X.cols(),X.type());
+        Mat Ytest = new Mat(y.rows(),y.cols()- YCV.cols() - Ytrain.cols(),y.type());
 
         for(int i= 0; i< X.rows(); i++){
             double rand = Math.random();

@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.rt_rk.vzbiljic.logisticregression.algorithm.IMachineLearningAlgorithm;
 import com.rt_rk.vzbiljic.logisticregression.algorithm.NeuralNetwork;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.MultipleDataSource;
 import com.rt_rk.vzbiljic.logisticregression.dataSource.multiple.AbstractCVMultipleDataSource;
 
 import org.opencv.core.Mat;
@@ -21,7 +20,7 @@ public class PredictionTest implements ITest{
 
     private static final double LAMBDA = 0.0;
 
-    private static final double ALPHA = 4;
+    private static final double ALPHA = 0.5;
 
     private static final double THRESHOLD = 0.5;
 

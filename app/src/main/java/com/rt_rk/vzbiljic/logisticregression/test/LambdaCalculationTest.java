@@ -1,15 +1,12 @@
 package com.rt_rk.vzbiljic.logisticregression.test;
 
-import android.nfc.Tag;
 import android.util.Log;
 
 import com.rt_rk.vzbiljic.logisticregression.algorithm.IMachineLearningAlgorithm;
 import com.rt_rk.vzbiljic.logisticregression.algorithm.NeuralNetwork;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.MultipleDataSource;
 import com.rt_rk.vzbiljic.logisticregression.dataSource.multiple.AbstractCVMultipleDataSource;
 
 import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
 
 import java.util.List;
 

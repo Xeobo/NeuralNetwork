@@ -23,11 +23,11 @@ public abstract class AbstractTestMultipleDataSource implements IDataSource{
     protected List<Mat> initData(){
         List<Mat> mats = init(dataSource);
 
-        Xtest = mats.get(0);
-        ytest = mats.get(1);
+        Xtrain = mats.get(0);
+        ytrain = mats.get(1);
 
-        Xtrain = mats.get(2);
-        ytrain = mats.get(3);
+        Xtest = mats.get(2);
+        ytest = mats.get(3);
 
         return mats;
     }

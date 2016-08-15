@@ -20,7 +20,7 @@ public abstract class AbstractCVMultipleDataSource  extends AbstractTestMultiple
 
     @Override
     protected final List<Mat> initData(){
-        List<Mat> mats = init(dataSource);
+        List<Mat> mats = super.initData();
         Xcv = mats.get(4);
         ycv = mats.get(5);
         return mats;

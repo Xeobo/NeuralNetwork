@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.rt_rk.vzbiljic.logisticregression.algorithm.IMachineLearningAlgorithm;
 import com.rt_rk.vzbiljic.logisticregression.algorithm.SVMAlgorithm;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.MultipleDataSource;
 import com.rt_rk.vzbiljic.logisticregression.dataSource.multiple.AbstractCVMultipleDataSource;
 
 import org.opencv.core.Mat;
