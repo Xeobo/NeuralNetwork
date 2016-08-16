@@ -108,7 +108,7 @@ public class WatchedDataSource implements IDataSource{
     private static final int END_TIME = 3;
     private static final int DAY_OF_THE_WEEK = 4;
     private static final int GENRE_START = 5;
-    private static final int TEMP_START_TIME_MILLIS = GENRE_START + genreSize;
+    private static final int TEMP_START_TIME_MILLIS = GENRE_START + 1;
 
 
     //hidden layer size without bios unit
@@ -119,7 +119,7 @@ public class WatchedDataSource implements IDataSource{
     private final int OUTPUT_LAYER_SIZE = 1;
 
     //the value in witch Epsilon surrounding should be initial theta values
-    private static final double CONVERGE_VALUE = 4;
+    private static final double CONVERGE_VALUE = 0;
 
     public static final String COLUMN_WATCH_START_TIME_UTC_MILLIS =
             "watch_start_time_utc_millis";
@@ -233,14 +233,16 @@ public class WatchedDataSource implements IDataSource{
                 gc.setTimeInMillis(endTime);
                 newRow.put(0,END_TIME, (60*gc.get(Calendar.HOUR) + gc.get(Calendar.MINUTE)-720)/1440.);
 
-                //genre --scaled--
-                Integer genre = mappGenre.get(cursor.getString(cursor.getColumnIndex(COLUMN_BROADCAST_GENRE)));
+                //genre -- not scaled--
+                Integer genre = genreMapping.get(cursor.getString(cursor.getColumnIndex(COLUMN_BROADCAST_GENRE)));
 
                 //if genre doesn't exists put it in OTHERS_COLUMN
                 if(null == genre){
-                    genre = OTHERS_COLUMN;
+                    genreMapping.put(cursor.getString(cursor.getColumnIndex(COLUMN_BROADCAST_GENRE)),genreCount);
+
+                    genre = genreCount++;
                 }
-                newRow.put(0, GENRE_START + genre ,1);
+                newRow.put(0, GENRE_START,genreCount);
 
                 //day of the week --scaled--
                 //take it as day of the week of start Time
@@ -250,7 +252,7 @@ public class WatchedDataSource implements IDataSource{
 
                 //last column is startTimeInMillis and is used only to init Y matrix properly
                 //after that last column should be deleted
-                newRow.put(0,TEMP_START_TIME_MILLIS,startTime);
+                newRow.put(0, TEMP_START_TIME_MILLIS,startTime);
 
                 index++;
 
@@ -265,9 +267,10 @@ public class WatchedDataSource implements IDataSource{
 
             cursor.close();
 
-            //scale channel_id
+            //scale channel_id and genre
             for(int i=0;i<X.rows();i++){
                 X.put(i,CHANNEL_ID,(X.get(i,CHANNEL_ID)[0] - (maxChannel + minChannel)/2)/maxChannel);
+                X.put(i,GENRE_START,(X.get(i,GENRE_START)[0] - (genreCount)/2)/maxChannel);
             }
 
 
@@ -310,7 +313,7 @@ public class WatchedDataSource implements IDataSource{
                     }
                     write = false;
                     if(!found){
-                        Log.w(TAG,"Positive training example not found in all examples matrix, " +
+                        Log.w(TAG, "Positive training example not found in all examples matrix, " +
                                 "for input values, startTimeMillis: " + startTime + " and channelID: "
                                 + cursor.getInt(cursor.getColumnIndex(COLUMN_CHANNEL_ID)) );
                     }

@@ -41,10 +41,10 @@ public class ExecutorService extends IntentService {
 
         IDataSource filterSource = (new ShrinkDataSourceFilter(
                 new ExpendPositivesDataSourceFilter(
-                    new WatchedDataSource(this,10))));
+                    new WatchedDataSource(this,40))));
 
 
-        ITest test =  new PredictionTest(new RandomCVMultipleDataSource(filterSource));
+        ITest test =  new PredictionTest(new FifoCVMulitpleDataSource(filterSource));
 
         long startTime = System.currentTimeMillis();
 
