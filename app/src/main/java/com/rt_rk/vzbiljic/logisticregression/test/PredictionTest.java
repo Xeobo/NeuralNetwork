@@ -20,7 +20,7 @@ public class PredictionTest implements ITest{
 
     private static final double LAMBDA = 0.0;
 
-    private static final double ALPHA = 0.3;
+    private static final double ALPHA = 0.6;
 
     private static final double THRESHOLD = 0.5;
 

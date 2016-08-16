@@ -108,7 +108,7 @@ public class WatchedDataSource implements IDataSource{
     private static final int END_TIME = 3;
     private static final int DAY_OF_THE_WEEK = 4;
     private static final int GENRE_START = 5;
-    private static final int TEMP_START_TIME_MILLIS = GENRE_START + 1;
+    private static final int TEMP_START_TIME_MILLIS = GENRE_START + genreSize;
 
 
     //hidden layer size without bios unit
@@ -234,15 +234,16 @@ public class WatchedDataSource implements IDataSource{
                 newRow.put(0,END_TIME, (60*gc.get(Calendar.HOUR) + gc.get(Calendar.MINUTE)-720)/1440.);
 
                 //genre -- not scaled--
-                Integer genre = genreMapping.get(cursor.getString(cursor.getColumnIndex(COLUMN_BROADCAST_GENRE)));
+                Integer genre = mappGenre.get(cursor.getString(cursor.getColumnIndex(COLUMN_BROADCAST_GENRE)));
 
                 //if genre doesn't exists put it in OTHERS_COLUMN
                 if(null == genre){
-                    genreMapping.put(cursor.getString(cursor.getColumnIndex(COLUMN_BROADCAST_GENRE)),genreCount);
+                    mappGenre.put(cursor.getString(cursor.getColumnIndex(COLUMN_BROADCAST_GENRE)), OTHERS_COLUMN);
 
-                    genre = genreCount++;
+                    genre = OTHERS_COLUMN;
+                    //genre = genreCount++;
                 }
-                newRow.put(0, GENRE_START,genre);
+                newRow.put(0, GENRE_START + genre,1);
 
                 //day of the week --scaled--
                 //take it as day of the week of start Time
