@@ -242,7 +242,7 @@ public class WatchedDataSource implements IDataSource{
 
                     genre = genreCount++;
                 }
-                newRow.put(0, GENRE_START,genreCount);
+                newRow.put(0, GENRE_START,genre);
 
                 //day of the week --scaled--
                 //take it as day of the week of start Time
