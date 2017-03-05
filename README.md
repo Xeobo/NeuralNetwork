@@ -55,4 +55,4 @@ Mat predictions = algorithm.hOfTheta(
 							);
 ...
 
-
+```
