@@ -1,5 +1,6 @@
 package com.rt_rk.vzbiljic.logisticregression;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -7,14 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.rt_rk.vzbiljic.logisticregression.algorithm.LogisticRegression;
-import com.rt_rk.vzbiljic.logisticregression.algorithm.IMachineLearningAlgorithm;
-import com.rt_rk.vzbiljic.logisticregression.test.GradientCheckTest;
-import com.rt_rk.vzbiljic.logisticregression.test.ITest;
-import com.rt_rk.vzbiljic.logisticregression.test.MatTest;
-import com.rt_rk.vzbiljic.logisticregression.test.ThetaCalculationTest;
 
-@Deprecated
 public class MainActivity extends AppCompatActivity {
 
     static{
@@ -39,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.front);
+
+        startService(new Intent(this,ExecutorService.class));
     }
 
     @Override

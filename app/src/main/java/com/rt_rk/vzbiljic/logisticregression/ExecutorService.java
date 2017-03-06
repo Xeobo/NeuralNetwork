@@ -6,20 +6,9 @@ import android.util.Log;
 
 import com.rt_rk.vzbiljic.logisticregression.algorithm.LogisticRegression;
 import com.rt_rk.vzbiljic.logisticregression.algorithm.NeuralNetwork;
-import com.rt_rk.vzbiljic.logisticregression.algorithm.SVMAlgorithm;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.IDataSource;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.filter.ExpendPositivesDataSourceFilter;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.filter.ShrinkDataSourceFilter;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.WatchedDataSource;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.filter.TypeDataSourceFilter;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.multiple.FifoCVMulitpleDataSource;
-import com.rt_rk.vzbiljic.logisticregression.dataSource.multiple.RandomCVMultipleDataSource;
+import com.rt_rk.vzbiljic.logisticregression.dataSource.SinusDataSource;
 import com.rt_rk.vzbiljic.logisticregression.test.ITest;
-import com.rt_rk.vzbiljic.logisticregression.test.PredictionTest;
-import com.rt_rk.vzbiljic.logisticregression.test.SVMTest;
-import com.rt_rk.vzbiljic.logisticregression.util.PropertiesUtil;
-
-import java.util.Properties;
+import com.rt_rk.vzbiljic.logisticregression.test.AlgorithmTest;
 
 
 /**
@@ -37,14 +26,8 @@ public class ExecutorService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
-        PropertiesUtil.init(this);
 
-        IDataSource filterSource = (new ShrinkDataSourceFilter(
-                new ExpendPositivesDataSourceFilter(
-                    new WatchedDataSource(this,40))));
-
-
-        ITest test =  new PredictionTest(new FifoCVMulitpleDataSource(filterSource));
+        ITest test =  new AlgorithmTest(new SinusDataSource());
 
         long startTime = System.currentTimeMillis();
 

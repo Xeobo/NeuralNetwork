@@ -42,11 +42,15 @@ public class SinusDataSource implements IDataSource {
 
     @Override
     public Mat getY() {
-        Mat y = new Mat(1,M,CvType.CV_64FC1);
+        Mat y = Mat.zeros(NUM_LABELS,M,CvType.CV_64FC1);
 
-        for(int i= 0; i< y.rows(); i++)
-            for(int j=0;j<y.cols();j++){
-                y.put(i,j,(j+1) % (NUM_LABELS+1));
+        for(int i= 0; i< y.cols(); i++)
+            if(NUM_LABELS == 1){
+                if(Math.random() > 0.5){
+                    y.put(0,i, 1);
+                }
+            }else {
+                y.put((int)(Math.random()*y.cols()),i,1);
             }
 
         return y;

@@ -3,11 +3,7 @@ package com.rt_rk.vzbiljic.logisticregression.algorithm;
 
 import android.util.Log;
 
-import com.rt_rk.vzbiljic.logisticregression.test.GradientCheckTest;
-import com.rt_rk.vzbiljic.logisticregression.util.MatrixPrint;
-
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
