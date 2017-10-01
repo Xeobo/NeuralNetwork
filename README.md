@@ -41,18 +41,18 @@ IMachineLearningAlgorithm algorithm = new NeuralNetwork( new LogisticRegression(
 
 //train Neural Network
 List<Mat> weights = algorithm.gradientDescent(
-									dataSource.getXTrain(),
-									dataSource.getYTrain(),
-									LAMBDA_VALUE,CONVERGE_RATIO, 
-									MAX_EXECUTION_TIME, 
-									dataSource.getThetas().toArray(new Mat[dataSource.getThetas().size()])
-								);
+						dataSource.getXTrain(),
+						dataSource.getYTrain(),
+						LAMBDA_VALUE,CONVERGE_RATIO, 
+						MAX_EXECUTION_TIME, 
+						dataSource.getThetas().toArray(new Mat[dataSource.getThetas().size()])
+					);
 
 //calculate prediction
 Mat predictions = algorithm.hOfTheta(
-								dataSource.getXTest(),
-								weights.toArray(new Mat[weights.size()])
-							);
+					dataSource.getXTest(),
+					weights.toArray(new Mat[weights.size()])
+				);
 ...
 
 ```
